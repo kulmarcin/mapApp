@@ -1,0 +1,40 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [12.x]
+    
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v2
+
+    - name: Set up node.js ${{matrix.node-version}} 
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{matrix.node-version}}
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run tests
+      run: npm test 
+
+    - name: Build
+      run: npm run build
+
+    - name: Deploy
+      run: |
+        git remote set-url origin https://github.com/kulmarcin/mapApp.git
+        npm run deploy
+
