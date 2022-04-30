@@ -28,6 +28,9 @@ jobs:
     - name: Globally update npm
       run: npm install -g npm@latest
 
+    - name: Set registry for @here
+      run: npm config set @here:registry https://repo.platform.here.com/artifactory/api/npm/maps-api-for-javascript/
+
     - name: Install dependencies
       run: npm install --force
 
