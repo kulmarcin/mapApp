@@ -2,48 +2,46 @@ name: CI/CD
 
 on:
   push:
-    branches: 
+    branches:
       - main
   pull_request:
-    branches: 
+    branches:
       - main
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v2
-      with:
-        persist-credentials: false
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
 
-    - name: Set up node.js 14 
-      uses: actions/setup-node@v2
-      with:
-        node-version: 14
-        cache: npm
-        
-    - name: Globally update npm
-      run: npm install -g npm@latest
+      - name: Set up node.js 14
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+          cache: npm
 
-    - name: Set registry for @here
-      run: npm config set @here:registry https://repo.platform.here.com/artifactory/api/npm/maps-api-for-javascript/
+      - name: Globally update npm
+        run: npm install -g npm@latest
 
-    - name: Install dependencies
-      run: npm install --force
+      - name: Set registry for @here
+        run: npm config set @here:registry https://repo.platform.here.com/artifactory/api/npm/maps-api-for-javascript/
 
-    # - name: Run tests
-    #   run: npm test 
+      - name: Install dependencies
+        run: npm install --force
 
-    - name: Build
-      run: npm run build
+      # - name: Run tests
+      #   run: npm test
 
-    - name: Deploy
-      run: |
-        git config --global user.email ${{secrets.USER_EMAIL}}
-        git config --global user.name ${{secrets.USER_NAME}}
-        git remote set-url origin https://%{{secrets.ACCESS_TOKEN}}@github.com/${{secrets.USER_NAME}}/mapApp
-        npm run deploy
+      - name: Build
+        run: npm run build
 
+      - name: Deploy
+        run: |
+          git config --global user.email ${{secrets.USER_EMAIL}}
+          git config --global user.name ${{secrets.USER_NAME}}
+          git remote set-url origin https://${{secrets.USER_NAME}}:${{secrets.PASSWORD}}@github.com/${{secrets.USER_NAME}}/mapApp.git
+          npm run deploy
