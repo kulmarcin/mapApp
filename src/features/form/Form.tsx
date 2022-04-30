@@ -4,7 +4,7 @@ import styles from './Form.module.scss';
 
 import { useAppSelector, useAppDispatch } from '../../app/hooks';
 
-import { getPosAsync, selectForm } from './formSlice';
+import { getPosAsync, selectForm, clearStatus, clearError } from './formSlice';
 
 export default function Form() {
   const navigate = useNavigate();
@@ -24,26 +24,39 @@ export default function Form() {
   };
 
   const submitHandler = () => {
+    dispatch(clearStatus());
     dispatch(
       getPosAsync({ queryOrigin: origin, queryDestination: destination })
     );
   };
 
-  //navigate to /map if finished
+  const clearErrorHandler = () => {
+    dispatch(clearError());
+  };
+
+  //navigate to /map if finished, if rejected - stay on /
   useEffect(() => {
     if (formState.status === 'finished') {
       navigate('/map');
+    } else if (formState.status === 'failed') {
+      navigate('/');
     }
   }, [formState.status, navigate]);
 
   return (
     <div className={styles.Form}>
       <h1>Maps App</h1>
-      <input type="text" placeholder="ORIGIN" onChange={originHandler} />
+      <input
+        type="text"
+        placeholder="ORIGIN"
+        onChange={originHandler}
+        onClick={clearErrorHandler}
+      />
       <input
         type="text"
         placeholder="DESTINATION"
         onChange={destinationHandler}
+        onClick={clearErrorHandler}
       />
       <button
         onClick={submitHandler}
@@ -54,6 +67,13 @@ export default function Form() {
 
       {formState.status === 'loading' && (
         <div className={styles.Loader}>Loading...</div>
+      )}
+
+      {formState.error && (
+        <div className={styles.Error}>
+          <h3>Error:</h3>
+          <p>{formState.error}</p>
+        </div>
       )}
 
       <div className={styles.History}>

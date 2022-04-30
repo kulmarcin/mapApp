@@ -16,6 +16,7 @@ export interface PositionState {
     destination: string;
   }>;
   routeLength: number;
+  error: string | null;
   status: 'idle' | 'loading' | 'failed' | 'finished';
 }
 
@@ -35,45 +36,50 @@ const initialState: PositionState = {
   },
   history: [],
   routeLength: 0,
+  error: null,
   status: 'idle'
 };
 
 export const getPosAsync = createAsyncThunk(
   'form/getPositions',
-  async ({ queryOrigin, queryDestination }: Queries) => {
-    //get origin and destination lat/lng
-    const responseOrigin = await fetch(
-      `https://geocode.search.hereapi.com/v1/geocode?q=${queryOrigin}&apiKey=${process.env.REACT_APP_API}`
-    );
-    const responseDestination = await fetch(
-      `https://geocode.search.hereapi.com/v1/geocode?q=${queryDestination}&apiKey=${process.env.REACT_APP_API}`
-    );
+  async ({ queryOrigin, queryDestination }: Queries, { rejectWithValue }) => {
+    try {
+      //get origin and destination lat/lng
+      const responseOrigin = await fetch(
+        `https://geocode.search.hereapi.com/v1/geocode?q=${queryOrigin}&apiKey=${process.env.REACT_APP_API}`
+      );
+      const responseDestination = await fetch(
+        `https://geocode.search.hereapi.com/v1/geocode?q=${queryDestination}&apiKey=${process.env.REACT_APP_API}`
+      );
 
-    const dataOrigin = await responseOrigin.json();
-    const dataDestination = await responseDestination.json();
+      const dataOrigin = await responseOrigin.json();
+      const dataDestination = await responseDestination.json();
 
-    //calculating total route length
-    const responseRouteLength = await fetch(
-      `https://router.hereapi.com/v8/routes?transportMode=car&origin=${dataOrigin.items[0].position.lat},${dataOrigin.items[0].position.lng}&destination=${dataDestination.items[0].position.lat},${dataDestination.items[0].position.lng}&return=summary&apiKey=${process.env.REACT_APP_API}`
-    );
-    const dataRouteLength = await responseRouteLength.json();
+      //calculating total route length
+      const responseRouteLength = await fetch(
+        `https://router.hereapi.com/v8/routes?transportMode=car&origin=${dataOrigin.items[0].position.lat},${dataOrigin.items[0].position.lng}&destination=${dataDestination.items[0].position.lat},${dataDestination.items[0].position.lng}&return=summary&apiKey=${process.env.REACT_APP_API}`
+      );
+      const dataRouteLength = await responseRouteLength.json();
 
-    const obj = {
-      origin: {
-        lat: dataOrigin.items[0].position.lat,
-        lng: dataOrigin.items[0].position.lng,
-        queryOrigin
-      },
-      destination: {
-        lat: dataDestination.items[0].position.lat,
-        lng: dataDestination.items[0].position.lng,
-        queryDestination
-      },
-      routeLength: +(
-        dataRouteLength.routes[0].sections[0].summary.length / 1000
-      ).toFixed(2)
-    };
-    return obj;
+      const obj = {
+        origin: {
+          lat: dataOrigin.items[0].position.lat,
+          lng: dataOrigin.items[0].position.lng,
+          queryOrigin
+        },
+        destination: {
+          lat: dataDestination.items[0].position.lat,
+          lng: dataDestination.items[0].position.lng,
+          queryDestination
+        },
+        routeLength: +(
+          dataRouteLength.routes[0].sections[0].summary.length / 1000
+        ).toFixed(2)
+      };
+      return obj;
+    } catch (err: any) {
+      return rejectWithValue(err.message);
+    }
   }
 );
 
@@ -83,6 +89,9 @@ export const formSlice = createSlice({
   reducers: {
     clearStatus: state => {
       state.status = 'idle';
+    },
+    clearError: state => {
+      state.error = null;
     }
   },
   extraReducers: builder => {
@@ -103,13 +112,22 @@ export const formSlice = createSlice({
         });
         state.routeLength = action.payload.routeLength;
       })
-      .addCase(getPosAsync.rejected, state => {
+      .addCase(getPosAsync.rejected, (state, action) => {
         state.status = 'failed';
+        let error;
+
+        switch (action.payload) {
+          case "Cannot read properties of undefined (reading 'position')":
+            error = 'Origin or Destination Not Found!';
+            break;
+        }
+
+        state.error = error as string;
       });
   }
 });
 
-export const { clearStatus } = formSlice.actions;
+export const { clearStatus, clearError } = formSlice.actions;
 
 export const selectForm = (state: RootState) => state.form;
 
