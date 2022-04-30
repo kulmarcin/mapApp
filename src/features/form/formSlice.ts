@@ -120,6 +120,9 @@ export const formSlice = createSlice({
           case "Cannot read properties of undefined (reading 'position')":
             error = 'Origin or Destination Not Found!';
             break;
+          case "Cannot read properties of undefined (reading 'sections')":
+            error = "Could Not Get There by Car!"
+            break;
         }
 
         state.error = error as string;

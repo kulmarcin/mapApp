@@ -1,7 +1,8 @@
 {
   "name": "maps2",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
+  "homepage": "http://kulmarcin.github.io/mapApp",
   "dependencies": {
     "@here/maps-api-for-javascript": "^1.30.15",
     "@reduxjs/toolkit": "^1.8.1",
@@ -24,6 +25,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "start": "react-app-rewired start",
     "build": "react-scripts build",
     "test": "react-scripts test",
