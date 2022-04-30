@@ -29,7 +29,7 @@ export default function Map() {
     if (formState.status === 'finished') {
       //map rendering
       const platform = new H.service.Platform({
-        apikey: process.env.REACT_APP_API
+        apikey: process.env.REACT_APP_API as string
       });
       const layers = platform.createDefaultLayers();
       const map = new H.Map(mapRef.current!, layers.vector.normal.map, {
