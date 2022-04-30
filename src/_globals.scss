@@ -1,0 +1,16 @@
+@mixin button {
+  width: 10rem;
+  margin-top: 1rem;
+  height: 2rem;
+  outline: none;
+  border-radius: 15px;
+  border: 2px solid black;
+
+  &:hover {
+    cursor: pointer;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
