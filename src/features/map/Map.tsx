@@ -57,7 +57,7 @@ export default function Map() {
 
             // Create a polyline to display the route:
             let routeLine = new H.map.Polyline(linestring, {
-              style: { strokeColor: 'blue', lineWidth: 3 }
+              style: { strokeColor: 'blue', lineWidth: 3 }, data: {}
             });
 
             // Create a marker for the start point:
@@ -74,11 +74,11 @@ export default function Map() {
             // Set the map's viewport to make the whole route visible:
             map
               .getViewModel()
-              .setLookAtData({ bounds: routeLine.getBoundingBox() });
+              .setLookAtData({ bounds: routeLine.getBoundingBox() as H.geo.AbstractGeometry });
           });
         }
       };
-      const router = platform.getRoutingService(null, 8);
+      const router = platform.getRoutingService(undefined, 8);
 
       router.calculateRoute(routingParameters, onResult, function (error) {
         alert(error.message);
