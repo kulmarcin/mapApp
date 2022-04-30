@@ -42,8 +42,8 @@ jobs:
 
     - name: Deploy
       run: |
-        git config --global user.email "roozeek@icloud.com"
-        git config --global user.name "Marcin"
-        git remote set-url origin https://github.com/kulmarcin/mapApp.git
+        git config --global user.email ${{secrets.USER_EMAIL}}
+        git config --global user.name ${{secrets.USER_NAME}}
+        git remote set-url origin https://%{{secrets.ACCESS_TOKEN}}@github.com/${{secrets.USER_NAME}}/mapApp
         npm run deploy
 
